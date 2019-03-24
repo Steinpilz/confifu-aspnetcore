@@ -48,10 +48,10 @@
             {
                 var childApp = app.New();
                 var childServices = new ServiceCollection(services);
+                    
                 this.ConcatActions(childBuilder.ServiceConfigurators)(childServices);
 
                 var childServiceProvider = this.serviceProviderFactory(childServices);
-
                 childApp.ApplicationServices = childServiceProvider;
 
                 this.BuildUpApplicationBuilder(childServices, childApp, childBuilder);

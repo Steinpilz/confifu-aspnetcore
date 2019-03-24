@@ -6,6 +6,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="..\..\app\Confifu.AspNetCore\Builder\ServiceCollectionExts.cs" Link="ServiceCollectionExts.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Confifu" Version="2.1.2" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
