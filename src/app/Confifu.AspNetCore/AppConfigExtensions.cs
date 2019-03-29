@@ -25,8 +25,8 @@
             {
                 this.appConfig.SetAspNetCoreConfigurationFactory(() =>
                 {
-                    var configurationBuilder = this.stagesConfiguration.Merge();
-                    var factory = new AspNetCoreConfigurationFactory(configurationBuilder, this.serviceProviderFactory);
+                    var builders = this.stagesConfiguration.Merge();
+                    var factory = new AspNetCoreConfigurationFactory(builders, this.serviceProviderFactory);
                     return factory.Create();
                 });
 

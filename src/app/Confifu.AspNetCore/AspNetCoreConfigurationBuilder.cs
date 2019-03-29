@@ -10,7 +10,6 @@ namespace Confifu.AspNetCore
 
     public class AspNetCoreConfigurationBuilder
     {
-        internal bool DisableForking;
         internal IAppConfig AppConfig { get; }
 
         public AspNetCoreConfigurationBuilder(IAppConfig appConfig)
@@ -29,7 +28,7 @@ namespace Confifu.AspNetCore
 
         internal Func<HttpContext, bool> MapWhen { get; private set; }
 
-        internal PathString MapPath { get; private set; }
+        internal PathString? MapPath { get; private set; }
 
         public AspNetCoreConfigurationBuilder ConfigureAppConfig(Action<IAppConfig> configurator)
         {

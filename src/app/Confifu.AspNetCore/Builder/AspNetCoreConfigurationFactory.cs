@@ -10,22 +10,22 @@
 
     class AspNetCoreConfigurationFactory
     {
-        readonly AspNetCoreConfigurationBuilder builder;
+        readonly List<AspNetCoreConfigurationBuilder> builders;
         readonly Func<IServiceCollection, IServiceProvider> serviceProviderFactory;
 
         public AspNetCoreConfigurationFactory(
-            AspNetCoreConfigurationBuilder builder,
+            List<AspNetCoreConfigurationBuilder> builders,
             Func<IServiceCollection, IServiceProvider> serviceProviderFactory
         )
         {
-            this.builder = builder;
+            this.builders = builders;
             this.serviceProviderFactory = serviceProviderFactory;
         }
 
         public AspNetCoreConfiguration Create()
         {
             return new AspNetCoreConfiguration(
-                ConcatActions(this.builder.ServiceConfigurators),
+                ConcatActions(this.builders.SelectMany(x => x.ServiceConfigurators)),
                 this.BuildUpApplicationBuilderForRoot
             );
         }
@@ -35,17 +35,8 @@
             IApplicationBuilder applicationBuilder
         )
         {
-            this.builder.ChildBuilders.ForEach(x => this.BuildUpApplicationBuilder(services, applicationBuilder,x));
-            // this.BuildUpApplicationBuilder(services, applicationBuilder, this.builder);
+            this.builders.ForEach(x => BuildUpApplicationBuilder(services, applicationBuilder, x));
         }
-
-        static bool ShouldForkAppBuilder(AspNetCoreConfigurationBuilder builder) =>
-            !builder.DisableForking && (
-                builder.MapPath != null ||
-                builder.MapWhen != null ||
-                builder.ServiceConfigurators.Count > 0 ||
-                builder.ApplicationBuilderConfigurators.Count > 0
-            );
 
         void BuildUpApplicationBuilder(
             IServiceCollection services,
@@ -57,7 +48,7 @@
 
             foreach (var childBuilder in configBuilder.ChildBuilders)
             {
-                var childApp = ShouldForkAppBuilder(childBuilder) ? app.New() : app;
+                var childApp = app.New();
                 var childServices = new ServiceCollection(services);
                 childBuilder.ServiceConfigurators.ForEach(f => f(childServices));
 
@@ -99,7 +90,7 @@
             {
                 app.Use(async (ctx, next) =>
                 {
-                    if (ctx.Request.Path.StartsWithSegments(childBuilder.MapPath, out var matchedPath, out var remainingPath))
+                    if (ctx.Request.Path.StartsWithSegments(childBuilder.MapPath.Value, out var matchedPath, out var remainingPath))
                     {
                         // Update the path
                         var path = ctx.Request.Path;

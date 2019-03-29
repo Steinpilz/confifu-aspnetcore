@@ -5,21 +5,22 @@ namespace Confifu.AspNetCore
     using System;
     using System.Collections.Generic;
     using System.Linq;
+    using StageConfig = System.Collections.Generic.List<AspNetCoreConfigurationBuilder>;
 
     class StagesConfigurationBuilder
     {
-        public Dictionary<string, AspNetCoreConfigurationBuilder> Configurations { get; }
-            = new Dictionary<string, AspNetCoreConfigurationBuilder>();
+        public Dictionary<string, StageConfig> Configurations { get; }
+            = new Dictionary<string, StageConfig>();
 
         public Dictionary<string, HashSet<string>> Orders { get; }
             = new Dictionary<string, HashSet<string>>();
 
-        public AspNetCoreConfigurationBuilder Merge()
+        public List<AspNetCoreConfigurationBuilder> Merge()
         {
             var visited = new HashSet<string>();
             var visiting = new HashSet<string>();
 
-            var orderedBuilders = new List<AspNetCoreConfigurationBuilder>();
+            var orderedConfigs = new List<AspNetCoreConfigurationBuilder>();
 
             IEnumerable<string> DependentStages(string stage)
             {
@@ -39,7 +40,7 @@ namespace Confifu.AspNetCore
 
                 foreach (var dependentStage in DependentStages(stage)) VisitStage(dependentStage);
 
-                orderedBuilders.Add(Configurations[stage]);
+                orderedConfigs.AddRange(Configurations[stage]);
 
                 visiting.Remove(stage);
             }
@@ -52,9 +53,7 @@ namespace Confifu.AspNetCore
 
             TopSort();
 
-            var root = new AspNetCoreConfigurationBuilder(null) { DisableForking = true }; // apply to a root
-            root.ChildBuilders.AddRange(orderedBuilders);
-            return root;
+            return orderedConfigs;
         }
 
         public void AddConfiguration(string stage, IAppConfig appConfig, Action<AspNetCoreConfigurationBuilder> configuration)
@@ -62,11 +61,12 @@ namespace Confifu.AspNetCore
             if (string.IsNullOrEmpty(stage)) throw new ArgumentException("message", nameof(stage));
             if (configuration == null) throw new ArgumentNullException(nameof(configuration));
 
-            if (!this.Configurations.TryGetValue(stage, out var configurationBuilder))
-                this.Configurations[stage] = configurationBuilder =
-                new AspNetCoreConfigurationBuilder(appConfig) { DisableForking = true }; // apply to a root
+            if (!this.Configurations.TryGetValue(stage, out var stageConfig))
+                this.Configurations[stage] = stageConfig = new StageConfig();
 
-            configurationBuilder.Child(configuration);
+            var configurationBuilder = new AspNetCoreConfigurationBuilder(appConfig);
+            configuration(configurationBuilder);
+            stageConfig.Add(configurationBuilder);
         }
 
         public void Order(string firstStage, string nextStage)
