@@ -52,7 +52,7 @@ namespace Confifu.AspNetCore
 
             TopSort();
 
-            var root = new AspNetCoreConfigurationBuilder(null);
+            var root = new AspNetCoreConfigurationBuilder(null) { DisableForking = true }; // apply to a root
             root.ChildBuilders.AddRange(orderedBuilders);
             return root;
         }
@@ -63,7 +63,8 @@ namespace Confifu.AspNetCore
             if (configuration == null) throw new ArgumentNullException(nameof(configuration));
 
             if (!this.Configurations.TryGetValue(stage, out var configurationBuilder))
-                this.Configurations[stage] = configurationBuilder = new AspNetCoreConfigurationBuilder(appConfig);
+                this.Configurations[stage] = configurationBuilder =
+                new AspNetCoreConfigurationBuilder(appConfig) { DisableForking = true }; // apply to a root
 
             configurationBuilder.Child(configuration);
         }

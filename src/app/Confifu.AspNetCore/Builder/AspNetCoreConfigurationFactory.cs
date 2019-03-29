@@ -39,11 +39,13 @@
             // this.BuildUpApplicationBuilder(services, applicationBuilder, this.builder);
         }
 
-        static bool ShouldBranchAppBuilder(AspNetCoreConfigurationBuilder builder) =>
-            builder.MapPath != null ||
-            builder.MapWhen != null ||
-            builder.ServiceConfigurators.Count > 0 ||
-            builder.ApplicationBuilderConfigurators.Count > 0;
+        static bool ShouldForkAppBuilder(AspNetCoreConfigurationBuilder builder) =>
+            !builder.DisableForking && (
+                builder.MapPath != null ||
+                builder.MapWhen != null ||
+                builder.ServiceConfigurators.Count > 0 ||
+                builder.ApplicationBuilderConfigurators.Count > 0
+            );
 
         void BuildUpApplicationBuilder(
             IServiceCollection services,
@@ -53,10 +55,9 @@
         {
             configBuilder.ApplicationBuilderConfigurators.ForEach(f => f(app));
 
-            var shouldBranchAppBuilder = ShouldBranchAppBuilder(configBuilder);
             foreach (var childBuilder in configBuilder.ChildBuilders)
             {
-                var childApp = shouldBranchAppBuilder ? app.New() : app;
+                var childApp = ShouldForkAppBuilder(childBuilder) ? app.New() : app;
                 var childServices = new ServiceCollection(services);
                 childBuilder.ServiceConfigurators.ForEach(f => f(childServices));
 

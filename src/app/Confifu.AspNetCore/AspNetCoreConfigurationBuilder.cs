@@ -10,6 +10,7 @@ namespace Confifu.AspNetCore
 
     public class AspNetCoreConfigurationBuilder
     {
+        internal bool DisableForking;
         internal IAppConfig AppConfig { get; }
 
         public AspNetCoreConfigurationBuilder(IAppConfig appConfig)
