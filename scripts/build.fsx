@@ -1,6 +1,6 @@
 // include Fake lib
-#r @"..\packages\FAKE\tools\FakeLib.dll"
-#r @"..\packages\Steinpilz.DevFlow.Fake\tools\Steinpilz.DevFlow.Fake.Lib.dll"
+#r @"../packages/FAKE/tools/FakeLib.dll"
+#r @"../packages/Steinpilz.DevFlow.Fake/tools/Steinpilz.DevFlow.Fake.Lib.dll"
 
 open Fake
 open Steinpilz.DevFlow.Fake 

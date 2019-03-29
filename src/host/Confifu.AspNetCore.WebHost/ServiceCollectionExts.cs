@@ -1,11 +1,10 @@
-﻿namespace Confifu.AspNetCore.Builder
-{
-    using System;
-    using System.Linq;
-    using System.Linq.Expressions;
-    using System.Reflection;
-    using Microsoft.Extensions.DependencyInjection;
+﻿using System;
+using System.Linq.Expressions;
+using System.Reflection;
+using Microsoft.Extensions.DependencyInjection;
 
+namespace Confifu.AspNetCore.WebHost
+{
     static class ServiceCollectionExts
     {
         static readonly MethodInfo GetServiceMethod = typeof(IServiceProvider).GetMethod("GetService");
@@ -30,14 +29,14 @@
                 // it's safe for transient lifetime only, but there is no alternatives by now
                 return original;
             }
-            
+
             var implementationType = TryGetImplementationType(original);
 
-            var factory = 
+            var factory =
                 implementationType == null || implementationType == typeof(object)
                 ? _ => sp.GetService(original.ServiceType)
                 : (Func<IServiceProvider, object>)GetTypedFactory(sp, original.ServiceType, implementationType);
-            
+
             return new ServiceDescriptor(
                 original.ServiceType,
                 factory,

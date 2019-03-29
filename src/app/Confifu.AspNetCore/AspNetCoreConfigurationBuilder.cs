@@ -1,4 +1,6 @@
-﻿namespace Confifu.AspNetCore
+﻿using Confifu.Abstractions;
+
+namespace Confifu.AspNetCore
 {
     using System;
     using System.Collections.Generic;
@@ -8,6 +10,13 @@
 
     public class AspNetCoreConfigurationBuilder
     {
+        internal IAppConfig AppConfig { get; }
+
+        public AspNetCoreConfigurationBuilder(IAppConfig appConfig)
+        {
+            AppConfig = appConfig;
+        }
+
         internal List<Action<IApplicationBuilder>> ApplicationBuilderConfigurators { get; } =
             new List<Action<IApplicationBuilder>>();
 
@@ -20,6 +29,13 @@
         internal Func<HttpContext, bool> MapWhen { get; private set; }
 
         internal PathString MapPath { get; private set; }
+
+        public AspNetCoreConfigurationBuilder ConfigureAppConfig(Action<IAppConfig> configurator)
+        {
+            if (configurator == null) throw new ArgumentNullException(nameof(configurator));
+            configurator(AppConfig);
+            return this;
+        }
 
         public AspNetCoreConfigurationBuilder ConfigureServices(Action<IServiceCollection> configurator)
         {
@@ -38,11 +54,11 @@
         public AspNetCoreConfigurationBuilder Child(Action<AspNetCoreConfigurationBuilder> childConfigurator)
         {
             if (childConfigurator == null) throw new ArgumentNullException(nameof(childConfigurator));
-            
-            var child = new AspNetCoreConfigurationBuilder();
+
+            var child = new AspNetCoreConfigurationBuilder(AppConfig);
             childConfigurator(child);
             this.ChildBuilders.Add(child);
-            
+
             return this;
         }
 
@@ -51,12 +67,11 @@
             Action<AspNetCoreConfigurationBuilder> childConfigurator)
         {
             if (childConfigurator == null) throw new ArgumentNullException(nameof(childConfigurator));
-            
-            var child = new AspNetCoreConfigurationBuilder();
-            child.MapWhen = predicate;
+
+            var child = new AspNetCoreConfigurationBuilder(AppConfig) { MapWhen = predicate };
             childConfigurator(child);
             this.ChildBuilders.Add(child);
-            
+
             return this;
         }
 
@@ -65,12 +80,11 @@
             Action<AspNetCoreConfigurationBuilder> childConfigurator)
         {
             if (childConfigurator == null) throw new ArgumentNullException(nameof(childConfigurator));
-            
-            var child = new AspNetCoreConfigurationBuilder();
-            child.MapPath = path;
+
+            var child = new AspNetCoreConfigurationBuilder(AppConfig) { MapPath = path };
             childConfigurator(child);
             this.ChildBuilders.Add(child);
-            
+
             return this;
         }
     }

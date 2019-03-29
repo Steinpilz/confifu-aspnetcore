@@ -63,7 +63,7 @@ namespace Confifu.AspNetCore.WebHost
 
             services.AppProxiedServices(
                 confifuServiceProvider, confifuServices);
-            
+
             this.aspNetCoreConfig.ConfigureServices(services);
 
             services.Replace(ServiceDescriptor.Transient<IServiceCollection, IServiceCollection>(
@@ -80,7 +80,7 @@ namespace Confifu.AspNetCore.WebHost
             return container.Resolve<IServiceProvider>();
         }
     }
-    
+
     class App : Confifu.AppSetup
     {
         public App(IConfigVariables env) : base(env)
@@ -118,7 +118,7 @@ namespace Confifu.AspNetCore.WebHost
                                     .SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
                                     .ConfigureApplicationPartManager(pm =>
                                     {
-                                        
+
                                     })
                                     .AddJsonOptions(json =>
                                     {

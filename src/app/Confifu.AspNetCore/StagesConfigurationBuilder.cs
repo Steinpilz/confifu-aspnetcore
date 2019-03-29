@@ -1,4 +1,6 @@
-﻿namespace Confifu.AspNetCore
+﻿using Confifu.Abstractions;
+
+namespace Confifu.AspNetCore
 {
     using System;
     using System.Collections.Generic;
@@ -6,29 +8,22 @@
 
     class StagesConfigurationBuilder
     {
-        public Dictionary<string, List<StageConfiguration>> Configurations { get; }
-            = new Dictionary<string, List<StageConfiguration>>();
+        public Dictionary<string, AspNetCoreConfigurationBuilder> Configurations { get; }
+            = new Dictionary<string, AspNetCoreConfigurationBuilder>();
 
         public Dictionary<string, HashSet<string>> Orders { get; }
             = new Dictionary<string, HashSet<string>>();
 
-        public Action<AspNetCoreConfigurationBuilder> Build()
+        public AspNetCoreConfigurationBuilder Merge()
         {
             var visited = new HashSet<string>();
             var visiting = new HashSet<string>();
 
-            var orderedStages = new List<StageConfiguration>();
+            var orderedBuilders = new List<AspNetCoreConfigurationBuilder>();
 
             IEnumerable<string> DependentStages(string stage)
             {
                 return this.Orders.TryGetValue(stage, out var stages) ? stages : Enumerable.Empty<string>();
-            }
-
-            IEnumerable<StageConfiguration> Configuration(string stage)
-            {
-                return this.Configurations.TryGetValue(stage, out var result)
-                    ? result.AsEnumerable()
-                    : Enumerable.Empty<StageConfiguration>();
             }
 
             void VisitStage(string stage)
@@ -44,7 +39,7 @@
 
                 foreach (var dependentStage in DependentStages(stage)) VisitStage(dependentStage);
 
-                orderedStages.AddRange(Configuration(stage));
+                orderedBuilders.Add(Configurations[stage]);
 
                 visiting.Remove(stage);
             }
@@ -56,23 +51,21 @@
             }
 
             TopSort();
-            return appBuilder =>
-            {
-                foreach (var stage in orderedStages)
-                    stage.Configuration(appBuilder);
-            };
+
+            var root = new AspNetCoreConfigurationBuilder(null);
+            root.ChildBuilders.AddRange(orderedBuilders);
+            return root;
         }
 
-        public void AddConfiguration(string stage, Action<AspNetCoreConfigurationBuilder> configuration)
+        public void AddConfiguration(string stage, IAppConfig appConfig, Action<AspNetCoreConfigurationBuilder> configuration)
         {
             if (string.IsNullOrEmpty(stage)) throw new ArgumentException("message", nameof(stage));
-
             if (configuration == null) throw new ArgumentNullException(nameof(configuration));
 
-            if (!this.Configurations.TryGetValue(stage, out var configurations))
-                this.Configurations[stage] = configurations = new List<StageConfiguration>();
+            if (!this.Configurations.TryGetValue(stage, out var configurationBuilder))
+                this.Configurations[stage] = configurationBuilder = new AspNetCoreConfigurationBuilder(appConfig);
 
-            configurations.Add(new StageConfiguration(stage, configuration));
+            configurationBuilder.Child(configuration);
         }
 
         public void Order(string firstStage, string nextStage)

@@ -6,11 +6,8 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\..\app\Confifu.AspNetCore\Builder\ServiceCollectionExts.cs" Link="ServiceCollectionExts.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Confifu" Version="2.1.2" />
+    <PackageReference Include="Confifu.Abstractions.DependencyInjection" Version="2.1.1" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.2.0" PrivateAssets="All" />
   </ItemGroup>
@@ -18,12 +15,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\app\Confifu.AspNetCore.Autofac\Confifu.AspNetCore.Autofac.csproj" />
     <ProjectReference Include="..\..\app\Confifu.AspNetCore\Confifu.AspNetCore.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="Confifu.Abstractions.DependencyInjection">
-      <HintPath>..\..\..\..\..\..\..\Users\ivanbianko\.nuget\packages\confifu.abstractions.dependencyinjection\2.1.0\lib\netstandard1.0\Confifu.Abstractions.DependencyInjection.dll</HintPath>
-    </Reference>
   </ItemGroup>
 
 </Project>

@@ -25,9 +25,7 @@
             {
                 this.appConfig.SetAspNetCoreConfigurationFactory(() =>
                 {
-                    var configurationBuilder = new AspNetCoreConfigurationBuilder();
-                    this.stagesConfiguration.Build()(configurationBuilder);
-
+                    var configurationBuilder = this.stagesConfiguration.Merge();
                     var factory = new AspNetCoreConfigurationFactory(configurationBuilder, this.serviceProviderFactory);
                     return factory.Create();
                 });
@@ -40,13 +38,13 @@
                     }
                 });
             }
-            
-            public Config AddConfiguration(Action<AspNetCoreConfigurationBuilder>  configuration) => 
+
+            public Config AddConfiguration(Action<AspNetCoreConfigurationBuilder>  configuration) =>
                 this.AddConfiguration("default", configuration);
 
             public Config AddConfiguration(string stage, Action<AspNetCoreConfigurationBuilder>  configuration)
             {
-                this.stagesConfiguration.AddConfiguration(stage, configuration);
+                this.stagesConfiguration.AddConfiguration(stage, appConfig, configuration);
                 return this;
             }
 
@@ -85,7 +83,7 @@
         }
 
         internal static IAppConfig SetAspNetCoreConfigurationFactory(
-            this IAppConfig appConfig, 
+            this IAppConfig appConfig,
             Func<AspNetCoreConfiguration> configurationFactory
         )
         {
