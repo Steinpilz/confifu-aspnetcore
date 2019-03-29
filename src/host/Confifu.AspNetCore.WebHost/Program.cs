@@ -13,12 +13,21 @@ namespace Confifu.AspNetCore.WebHost
     using Microsoft.Extensions.DependencyInjection.Extensions;
     using Newtonsoft.Json.Serialization;
     using System;
+    using Builder;
+    using Controllers;
     using Microsoft.AspNetCore.Hosting;
 
     public class Program
     {
+        static Func<int, object> foo;
+
         public static void Main(string[] args)
         {
+            Func<int, string> fs = i => "123";
+            foo = fs;
+
+            var returnType = foo.GetType().GetGenericArguments()[1];
+
             CreateWebHostBuilder(args).Build().Run();
         }
 
@@ -50,7 +59,10 @@ namespace Confifu.AspNetCore.WebHost
         public override void ConfigureServices(IServiceCollection services)
         {
             var confifuServices = this.confifuApp.AppConfig.GetServiceCollection();
-            services.Add(confifuServices);
+            var confifuServiceProvider = this.confifuApp.AppConfig.GetServiceProvider();
+
+            services.AppProxiedServices(
+                confifuServiceProvider, confifuServices);
             
             this.aspNetCoreConfig.ConfigureServices(services);
 
@@ -84,6 +96,15 @@ namespace Confifu.AspNetCore.WebHost
                     sc.AddTransient<ServiceA>(sp => new ServiceA("RegisterServices"));
                     sc.AddTransient<ServiceB>(sp => new ServiceB("RegisterServices"));
                 })
+                .AddAppRunnerAfter(() =>
+                {
+                    var builder = new ContainerBuilder();
+
+                    builder.Populate(this.AppConfig.GetServiceCollection());
+
+                    var container = builder.Build();
+                    this.AppConfig.SetServiceProvider(container.Resolve<IServiceProvider>());
+                })
                 .UseAspNetCoreAutofac()
                 .UseAspNetCore(aspNetCore => aspNetCore
                     .AddConfiguration(c => c
@@ -95,6 +116,10 @@ namespace Confifu.AspNetCore.WebHost
 
                                 services.AddMvc()
                                     .SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
+                                    .ConfigureApplicationPartManager(pm =>
+                                    {
+                                        
+                                    })
                                     .AddJsonOptions(json =>
                                     {
                                         json.SerializerSettings.ContractResolver =

@@ -53,7 +53,6 @@
                 childBuilder.ServiceConfigurators.ForEach(f => f(childServices));
 
                 var childServiceProvider = this.serviceProviderFactory(childServices);
-
                 childApp.ApplicationServices = childServiceProvider;
 
                 this.BuildUpApplicationBuilder(childServices, childApp, childBuilder);

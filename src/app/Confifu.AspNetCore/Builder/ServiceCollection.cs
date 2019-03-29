@@ -1,14 +1,16 @@
 ﻿namespace Confifu.AspNetCore.Builder
 {
     using System.Collections.Generic;
-    using System.Linq;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.DependencyInjection.Extensions;
 
     class ServiceCollection : List<ServiceDescriptor>, IServiceCollection
     {
-        public ServiceCollection(params IServiceCollection[] collections)
+        public ServiceCollection()
         {
-            this.AddRange(collections.SelectMany(x => x));
         }
+
+        public ServiceCollection(IEnumerable<ServiceDescriptor> descriptors)
+            : base(descriptors){}
     }
 }
