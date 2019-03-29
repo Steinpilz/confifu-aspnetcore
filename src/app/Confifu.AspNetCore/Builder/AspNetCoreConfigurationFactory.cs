@@ -15,7 +15,8 @@
 
         public AspNetCoreConfigurationFactory(
             AspNetCoreConfigurationBuilder builder,
-            Func<IServiceCollection, IServiceProvider> serviceProviderFactory)
+            Func<IServiceCollection, IServiceProvider> serviceProviderFactory
+        )
         {
             this.builder = builder;
             this.serviceProviderFactory = serviceProviderFactory;
@@ -24,7 +25,7 @@
         public AspNetCoreConfiguration Create()
         {
             return new AspNetCoreConfiguration(
-                this.ConcatActions(this.builder.ServiceConfigurators),
+                ConcatActions(this.builder.ServiceConfigurators),
                 this.BuildUpApplicationBuilderForRoot
             );
         }
@@ -40,27 +41,31 @@
         void BuildUpApplicationBuilder(
             IServiceCollection services,
             IApplicationBuilder app,
-            AspNetCoreConfigurationBuilder configBuilder)
+            AspNetCoreConfigurationBuilder configBuilder
+        )
         {
-            this.ConcatActions(configBuilder.ApplicationBuilderConfigurators)(app);
+            configBuilder.ApplicationBuilderConfigurators.ForEach(f => f(app));
 
             foreach (var childBuilder in configBuilder.ChildBuilders)
             {
                 var childApp = app.New();
                 var childServices = new ServiceCollection(services);
-                this.ConcatActions(childBuilder.ServiceConfigurators)(childServices);
+                childBuilder.ServiceConfigurators.ForEach(f => f(childServices));
 
                 var childServiceProvider = this.serviceProviderFactory(childServices);
 
                 childApp.ApplicationServices = childServiceProvider;
 
                 this.BuildUpApplicationBuilder(childServices, childApp, childBuilder);
-                this.SetupChildMiddleware(app, childApp, childBuilder);
+                SetupChildMiddleware(app, childApp, childBuilder);
             }
         }
 
-        void SetupChildMiddleware(IApplicationBuilder app, IApplicationBuilder childApp,
-            AspNetCoreConfigurationBuilder childBuilder)
+        static void SetupChildMiddleware(
+            IApplicationBuilder app,
+            IApplicationBuilder childApp,
+            AspNetCoreConfigurationBuilder childBuilder
+        )
         {
             var branch = childApp.Build();
             var scopeFactory = childApp.ApplicationServices.GetService<IServiceScopeFactory>();
@@ -71,7 +76,7 @@
                 {
                     if (childBuilder.MapWhen(ctx))
                     {
-                        using (this.FeatureScope<IServiceProvidersFeature>(ctx, new RequestServicesFeature(ctx, scopeFactory)))
+                        using (ServiceProvidersFeatureScope(ctx, scopeFactory))
                         {
                             await branch(ctx);
                         }
@@ -96,7 +101,7 @@
 
                         try
                         {
-                            using (this.FeatureScope<IServiceProvidersFeature>(ctx, new RequestServicesFeature(ctx, scopeFactory)))
+                            using (ServiceProvidersFeatureScope(ctx, scopeFactory))
                             {
                                 await branch(ctx);
                             }
@@ -117,8 +122,7 @@
             {
                 app.Use(async (ctx, next) =>
                 {
-
-                    using (this.FeatureScope<IServiceProvidersFeature>(ctx, new RequestServicesFeature(ctx, scopeFactory)))
+                    using (ServiceProvidersFeatureScope(ctx, scopeFactory))
                     {
                         await branch(ctx);
                     }
@@ -128,12 +132,12 @@
             }
         }
 
-        IDisposable FeatureScope<T>(HttpContext ctx, T feature) => new FeatureScope<T>(ctx.Features, feature);
+        static IDisposable FeatureScope<T>(HttpContext ctx, T feature) => new FeatureScope<T>(ctx.Features, feature);
 
-        Action<T> ConcatActions<T>(IEnumerable<Action<T>> actions)
-        {
-            Action<T> start = _ => { };
-            return actions.Aggregate(start, (acc, seed) => acc + seed);
-        }
+        static IDisposable ServiceProvidersFeatureScope(HttpContext ctx, IServiceScopeFactory serviceScopeFactory) =>
+            FeatureScope<IServiceProvidersFeature>(ctx, new RequestServicesFeature(ctx, serviceScopeFactory));
+
+        static Action<T> ConcatActions<T>(IEnumerable<Action<T>> actions) =>
+            actions.Aggregate((Action<T>) (_ => { }), (a, x) => a + x);
     }
 }
