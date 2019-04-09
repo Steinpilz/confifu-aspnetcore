@@ -88,9 +88,10 @@
             }
             else if (childBuilder.MapPath != null)
             {
+                var mapPath = childBuilder.MapPath();
                 app.Use(async (ctx, next) =>
                 {
-                    if (ctx.Request.Path.StartsWithSegments(childBuilder.MapPath.Value, out var matchedPath, out var remainingPath))
+                    if (ctx.Request.Path.StartsWithSegments(mapPath, out var matchedPath, out var remainingPath))
                     {
                         // Update the path
                         var path = ctx.Request.Path;

@@ -28,7 +28,7 @@ namespace Confifu.AspNetCore
 
         internal Func<HttpContext, bool> MapWhen { get; private set; }
 
-        internal PathString? MapPath { get; private set; }
+        internal Func<PathString> MapPath { get; private set; }
 
         public AspNetCoreConfigurationBuilder ConfigureAppConfig(Action<IAppConfig> configurator)
         {
@@ -76,16 +76,21 @@ namespace Confifu.AspNetCore
         }
 
         public AspNetCoreConfigurationBuilder ChildMapPath(
-            PathString path,
+            Func<PathString> pathProvider,
             Action<AspNetCoreConfigurationBuilder> childConfigurator)
         {
             if (childConfigurator == null) throw new ArgumentNullException(nameof(childConfigurator));
 
-            var child = new AspNetCoreConfigurationBuilder(AppConfig) { MapPath = path };
+            var child = new AspNetCoreConfigurationBuilder(AppConfig) { MapPath = pathProvider };
             childConfigurator(child);
             this.ChildBuilders.Add(child);
 
             return this;
         }
+
+        public AspNetCoreConfigurationBuilder ChildMapPath(
+            PathString path,
+            Action<AspNetCoreConfigurationBuilder> childConfigurator
+        ) => ChildMapPath(() => path, childConfigurator);
     }
 }
