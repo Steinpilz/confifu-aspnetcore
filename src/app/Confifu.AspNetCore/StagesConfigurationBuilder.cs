@@ -40,7 +40,7 @@ namespace Confifu.AspNetCore
 
                 foreach (var dependentStage in DependentStages(stage)) VisitStage(dependentStage);
 
-                orderedConfigs.AddRange(Configurations[stage]);
+                if (Configurations.TryGetValue(stage, out var configuration)) orderedConfigs.AddRange(configuration);
 
                 visiting.Remove(stage);
             }
