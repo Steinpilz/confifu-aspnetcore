@@ -7,8 +7,8 @@
     <GenerateBindingRedirectsOutputType>True</GenerateBindingRedirectsOutputType>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Confifu" Version="2.1.2" />
-    <PackageReference Include="Confifu.Autofac" Version="2.0.1" />
+    <PackageReference Include="Confifu" Version="2.1.3" />
+    <PackageReference Include="Confifu.Autofac" Version="3.0.0" />
   </ItemGroup>
 
   <ItemGroup>
