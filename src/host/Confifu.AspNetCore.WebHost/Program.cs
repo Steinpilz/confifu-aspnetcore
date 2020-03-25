@@ -120,7 +120,11 @@ namespace Confifu.AspNetCore.WebHost
                                     {
 
                                     })
+#if NETCOREAPP3_1
+                                    .AddNewtonsoftJson(json =>
+#else
                                     .AddJsonOptions(json =>
+#endif
                                     {
                                         json.SerializerSettings.ContractResolver =
                                             new CamelCasePropertyNamesContractResolver();
@@ -140,7 +144,11 @@ namespace Confifu.AspNetCore.WebHost
 
                                 services.AddMvc()
                                     .SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
+#if NETCOREAPP3_1
+                                    .AddNewtonsoftJson(json =>
+#else
                                     .AddJsonOptions(json =>
+#endif
                                     {
                                         json.SerializerSettings.ContractResolver =
                                             new DefaultContractResolver();
