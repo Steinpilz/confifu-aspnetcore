@@ -3,7 +3,9 @@
 #r @"../packages/Steinpilz.DevFlow.Fake/tools/Steinpilz.DevFlow.Fake.Lib.dll"
 
 open Fake
-open Steinpilz.DevFlow.Fake 
+open Steinpilz.DevFlow.Fake
+
+setEnvironVar "VisualStudioVersion" "16.0"
 
 let libParams = Lib.setup <| fun p -> 
     { p with 
