@@ -122,6 +122,8 @@ namespace Confifu.AspNetCore.WebHost
                                     })
 #if NETCOREAPP3_1
                                     .AddNewtonsoftJson(json =>
+#elif NET5_0
+                                    .AddNewtonsoftJson(json =>
 #else
                                     .AddJsonOptions(json =>
 #endif
@@ -133,7 +135,12 @@ namespace Confifu.AspNetCore.WebHost
                             .Configure(app =>
                             {
                                 app.UseHttpsRedirection();
+#if NET5_0
+                                app.UseRouting();
+                                app.UseEndpoints(endpoints => endpoints.MapControllers());
+#else
                                 app.UseMvc();
+#endif
                             })
                         )
                         .ChildMapPath(PathString.FromUriComponent("/test2"), test1 => test1
@@ -146,6 +153,8 @@ namespace Confifu.AspNetCore.WebHost
                                     .SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
 #if NETCOREAPP3_1
                                     .AddNewtonsoftJson(json =>
+#elif NET5_0
+                                    .AddNewtonsoftJson(json =>
 #else
                                     .AddJsonOptions(json =>
 #endif
@@ -157,7 +166,12 @@ namespace Confifu.AspNetCore.WebHost
                             .Configure(app =>
                             {
                                 app.UseHttpsRedirection();
+#if NET5_0
+                                app.UseRouting();
+                                app.UseEndpoints(endpoints => endpoints.MapControllers());
+#else
                                 app.UseMvc();
+#endif
                             })
                         )
                     )

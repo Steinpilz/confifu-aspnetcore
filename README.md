@@ -1,23 +1,27 @@
 # Confifu.AspNetCore
 
 ## Introduction
-{TODO: Short description of the repository goes here}
 
-{TODO: Description for each package as a subsection}
+Confifu wrapper to host multiple asp.net core apps. 
+
+```
+<PackageReference Include="Confifu.AspNetCore" Version="1.2.0" />
+```
 
 ## FAQ
 
 ## Questions & Issues
 
-Use built-in gitlab [issue tracker]({TODO: repository link}/issues)
+Use built-in gitlab [issue tracker](https://github.com/Steinpilz/confifu-aspnetcore/issues)
 
 ## Maintainers
-@{TODO: Maintaner gitlab user name}
+@ivanbenko
 
 ## Contribution
 
 * Setup development environment:
 
 1. Clone the repo
-2. ```.paket\paket restore``` 
-3. ```build target=build```
+2. ```./build.sh target build```
+2. ```./build.sh target pack```
+2. ```./build.sh target publish```
