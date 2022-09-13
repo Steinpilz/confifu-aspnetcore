@@ -1,21 +1,20 @@
-﻿
+﻿using System;
+using Confifu.Abstractions;
+using Confifu.Abstractions.DependencyInjection;
+using Confifu.AspNetCore.Autofac;
+
+using global::Autofac.Extensions.DependencyInjection;
+using Autofac;
+
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.AspNetCore.Hosting;
+using Newtonsoft.Json.Serialization;
+
 namespace Confifu.AspNetCore.WebHost
 {
-    using Abstractions;
-    using Abstractions.DependencyInjection;
-    using Autofac;
-    using global::Autofac;
-    using global::Autofac.Extensions.DependencyInjection;
-    using Microsoft.AspNetCore.Builder;
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Mvc;
-    using Microsoft.Extensions.DependencyInjection;
-    using Microsoft.Extensions.DependencyInjection.Extensions;
-    using Newtonsoft.Json.Serialization;
-    using System;
-    using Builder;
-    using Controllers;
-    using Microsoft.AspNetCore.Hosting;
 
     public class Program
     {
@@ -115,16 +114,11 @@ namespace Confifu.AspNetCore.WebHost
                                     sp => new ServiceB("test1")));
 
                                 services.AddMvc()
-                                    .SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
                                     .ConfigureApplicationPartManager(pm =>
                                     {
 
                                     })
-#if NETCOREAPP3_1
                                     .AddNewtonsoftJson(json =>
-#else
-                                    .AddJsonOptions(json =>
-#endif
                                     {
                                         json.SerializerSettings.ContractResolver =
                                             new CamelCasePropertyNamesContractResolver();
@@ -143,12 +137,7 @@ namespace Confifu.AspNetCore.WebHost
                                     sp => new ServiceB("test2")));
 
                                 services.AddMvc()
-                                    .SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
-#if NETCOREAPP3_1
                                     .AddNewtonsoftJson(json =>
-#else
-                                    .AddJsonOptions(json =>
-#endif
                                     {
                                         json.SerializerSettings.ContractResolver =
                                             new DefaultContractResolver();

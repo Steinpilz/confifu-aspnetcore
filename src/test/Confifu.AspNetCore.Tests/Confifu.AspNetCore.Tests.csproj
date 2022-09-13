@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <Import Project="..\..\common.props" />
   <PropertyGroup>    
-    <TargetFrameworks>net462;netcoreapp2.2;netcoreapp3.1</TargetFrameworks>
+    <TargetFrameworks>net6.0</TargetFrameworks>
     <AutoGenerateBindingRedirects>True</AutoGenerateBindingRedirects>
     <GenerateBindingRedirectsOutputType>True</GenerateBindingRedirectsOutputType>
   </PropertyGroup>
