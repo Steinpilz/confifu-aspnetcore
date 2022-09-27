@@ -127,7 +127,16 @@ namespace Confifu.AspNetCore.WebHost
                             .Configure(app =>
                             {
                                 app.UseHttpsRedirection();
-                                app.UseMvc();
+                            })
+                            .Configure(app =>
+                            {
+                                app.UseRouting();
+                                app.UseAuthorization();
+                                app.UseEndpoints(endpoints =>
+                                {
+                                    endpoints.MapRazorPages();
+                                    endpoints.MapControllers();
+                                });
                             })
                         )
                         .ChildMapPath(PathString.FromUriComponent("/test2"), test1 => test1
@@ -146,9 +155,40 @@ namespace Confifu.AspNetCore.WebHost
                             .Configure(app =>
                             {
                                 app.UseHttpsRedirection();
-                                app.UseMvc();
+                            })
+                            .Configure(app =>
+                            {
+                                app.UseRouting();
+                                app.UseAuthorization();
+                                app.UseEndpoints(endpoints =>
+                                {
+                                    endpoints.MapRazorPages();
+                                    endpoints.MapControllers();
+                                });
                             })
                         )
+                        .ConfigureServices(services =>
+                        {
+                            services.AddMvc()
+                                .AddNewtonsoftJson(json =>
+                                {
+                                    json.SerializerSettings.ContractResolver =
+                                        new DefaultContractResolver();
+                                });
+                        })
+                        .Configure(app =>
+                        {
+                            app.UseHttpsRedirection();
+                        })
+                        .Configure(app =>
+                        {
+                            app.UseRouting();
+                            app.UseAuthorization();
+                            app.UseEndpoints(endpoints =>
+                            {
+                                endpoints.MapGet("/", () => "Confifu Asp.Net Core application");
+                            });
+                        })
                     )
                 );
         }
