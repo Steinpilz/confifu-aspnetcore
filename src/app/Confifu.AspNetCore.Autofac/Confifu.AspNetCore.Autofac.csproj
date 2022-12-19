@@ -1,19 +1,19 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFrameworks>net6.0</TargetFrameworks>
-	</PropertyGroup>
+  <PropertyGroup>
+    <TargetFrameworks>net6.0</TargetFrameworks>
+  </PropertyGroup>
 
-	<ItemGroup>
-		<FrameworkReference Include="Microsoft.AspNetCore.App" />
-	</ItemGroup>
-	
-	<ItemGroup>
-	<PackageReference Include="Autofac" Version="6.4.0" />
-		<PackageReference Include="Autofac.Extensions.DependencyInjection" Version="8.0.0" />
-	</ItemGroup>
-	
-	<ItemGroup>
-		<ProjectReference Include="..\Confifu.AspNetCore\Confifu.AspNetCore.csproj" />
-	</ItemGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Autofac" Version="6.4.0" />
+    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="8.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Confifu.AspNetCore\Confifu.AspNetCore.csproj" />
+  </ItemGroup>
 </Project>
