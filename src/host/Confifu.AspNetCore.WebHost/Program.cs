@@ -1,20 +1,20 @@
-﻿using System;
-using Confifu.Abstractions;
-using Confifu.Abstractions.DependencyInjection;
-using Confifu.AspNetCore.Autofac;
-
-using global::Autofac.Extensions.DependencyInjection;
-using Autofac;
-
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.AspNetCore.Hosting;
-using Newtonsoft.Json.Serialization;
-
-namespace Confifu.AspNetCore.WebHost
+﻿namespace Confifu.AspNetCore.WebHost
 {
+    using Abstractions;
+    using Abstractions.DependencyInjection;
+    using Autofac;
+    using global::Autofac;
+    using global::Autofac.Extensions.DependencyInjection;
+    using Microsoft.AspNetCore.Builder;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.AspNetCore.Mvc;
+    using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.DependencyInjection.Extensions;
+    using Newtonsoft.Json.Serialization;
+    using System;
+    using Builder;
+    using Controllers;
+    using Microsoft.AspNetCore.Hosting;
 
     public class Program
     {
@@ -118,7 +118,11 @@ namespace Confifu.AspNetCore.WebHost
                                     {
 
                                     })
+#if NETCOREAPP3_1_OR_GREATER
                                     .AddNewtonsoftJson(json =>
+#else
+                                    .AddJsonOptions(json =>
+#endif
                                     {
                                         json.SerializerSettings.ContractResolver =
                                             new CamelCasePropertyNamesContractResolver();
@@ -146,7 +150,11 @@ namespace Confifu.AspNetCore.WebHost
                                     sp => new ServiceB("test2")));
 
                                 services.AddMvc()
+#if NETCOREAPP3_1_OR_GREATER
                                     .AddNewtonsoftJson(json =>
+#else
+                                    .AddJsonOptions(json =>
+#endif
                                     {
                                         json.SerializerSettings.ContractResolver =
                                             new DefaultContractResolver();
@@ -158,6 +166,7 @@ namespace Confifu.AspNetCore.WebHost
                             })
                             .Configure(app =>
                             {
+#if NETCOREAPP3_1_OR_GREATER
                                 app.UseRouting();
                                 app.UseAuthorization();
                                 app.UseEndpoints(endpoints =>
@@ -165,15 +174,22 @@ namespace Confifu.AspNetCore.WebHost
                                     endpoints.MapRazorPages();
                                     endpoints.MapControllers();
                                 });
+#else
+                            app.UseMvc();
+#endif
                             })
                         )
                         .ConfigureServices(services =>
                         {
                             services.AddMvc()
-                                .AddNewtonsoftJson(json =>
-                                {
-                                    json.SerializerSettings.ContractResolver =
-                                        new DefaultContractResolver();
+#if NETCOREAPP3_1_OR_GREATER
+                                    .AddNewtonsoftJson(json =>
+#else
+                                    .AddJsonOptions(json =>
+#endif
+                                    {
+                                        json.SerializerSettings.ContractResolver =
+                                            new DefaultContractResolver();
                                 });
                         })
                         .Configure(app =>
@@ -182,12 +198,13 @@ namespace Confifu.AspNetCore.WebHost
                         })
                         .Configure(app =>
                         {
-                            app.UseRouting();
                             app.UseAuthorization();
-                            app.UseEndpoints(endpoints =>
-                            {
-                                endpoints.MapGet("/", () => "Confifu Asp.Net Core application");
-                            });
+#if NET5_0_OR_GREATER
+                            app.UseRouting();
+                            app.UseEndpoints(endpoints => endpoints.MapControllers());
+#else
+                            app.UseMvc();
+#endif
                         })
                     )
                 );
