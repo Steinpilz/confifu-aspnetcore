@@ -1,5 +1,4 @@
-﻿
-namespace Confifu.AspNetCore.WebHost
+﻿namespace Confifu.AspNetCore.WebHost
 {
     using Abstractions;
     using Abstractions.DependencyInjection;
@@ -115,12 +114,11 @@ namespace Confifu.AspNetCore.WebHost
                                     sp => new ServiceB("test1")));
 
                                 services.AddMvc()
-                                    .SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
                                     .ConfigureApplicationPartManager(pm =>
                                     {
 
                                     })
-#if NETCOREAPP3_1
+#if NETCOREAPP3_1_OR_GREATER
                                     .AddNewtonsoftJson(json =>
 #else
                                     .AddJsonOptions(json =>
@@ -133,7 +131,16 @@ namespace Confifu.AspNetCore.WebHost
                             .Configure(app =>
                             {
                                 app.UseHttpsRedirection();
-                                app.UseMvc();
+                            })
+                            .Configure(app =>
+                            {
+                                app.UseRouting();
+                                app.UseAuthorization();
+                                app.UseEndpoints(endpoints =>
+                                {
+                                    endpoints.MapRazorPages();
+                                    endpoints.MapControllers();
+                                });
                             })
                         )
                         .ChildMapPath(PathString.FromUriComponent("/test2"), test1 => test1
@@ -143,8 +150,7 @@ namespace Confifu.AspNetCore.WebHost
                                     sp => new ServiceB("test2")));
 
                                 services.AddMvc()
-                                    .SetCompatibilityVersion(CompatibilityVersion.Version_2_2)
-#if NETCOREAPP3_1
+#if NETCOREAPP3_1_OR_GREATER
                                     .AddNewtonsoftJson(json =>
 #else
                                     .AddJsonOptions(json =>
@@ -157,9 +163,49 @@ namespace Confifu.AspNetCore.WebHost
                             .Configure(app =>
                             {
                                 app.UseHttpsRedirection();
-                                app.UseMvc();
+                            })
+                            .Configure(app =>
+                            {
+#if NETCOREAPP3_1_OR_GREATER
+                                app.UseRouting();
+                                app.UseAuthorization();
+                                app.UseEndpoints(endpoints =>
+                                {
+                                    endpoints.MapRazorPages();
+                                    endpoints.MapControllers();
+                                });
+#else
+                            app.UseMvc();
+#endif
                             })
                         )
+                        .ConfigureServices(services =>
+                        {
+                            services.AddMvc()
+#if NETCOREAPP3_1_OR_GREATER
+                                    .AddNewtonsoftJson(json =>
+#else
+                                    .AddJsonOptions(json =>
+#endif
+                                    {
+                                        json.SerializerSettings.ContractResolver =
+                                            new DefaultContractResolver();
+                                });
+                        })
+                        .Configure(app =>
+                        {
+                            app.UseHttpsRedirection();
+                        })
+                        .Configure(app =>
+                        {
+                            app.UseAuthorization();
+#if NET5_0_OR_GREATER
+                            app.UseRouting();
+                            app.UseEndpoints(endpoints => endpoints.MapControllers());
+#else
+                            app.UseMvc();
+#endif
+                        })
                     )
                 );
         }
